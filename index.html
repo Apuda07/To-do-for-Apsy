@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doing Life</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="app-title">
+                <p class="eyebrow">Okay, we got this</p>
+                <div class="title-row">
+                    <h1>Doing Life</h1>
+                    <button id="openListDialog" type="button" class="primary-button">+ Create list</button>
+                </div>
+            </div>
+            <div class="settings-menu-container">
+                <button id="toggleSettingsMenu" type="button" class="settings-button" aria-haspopup="true" aria-expanded="false" aria-controls="settingsMenu">
+                    <span aria-hidden="true">⚙</span>
+                    Settings
+                </button>
+                <div id="settingsMenu" class="settings-menu" role="menu" hidden>
+                    <button type="button" role="menuitem" data-settings-action="edit-lists">Edit lists</button>
+                    <button type="button" role="menuitem" data-settings-action="edit-tags">Edit tags</button>
+                </div>
+            </div>
+        </header>
+
+        <dialog id="listDialog" class="app-dialog" aria-labelledby="listDialogTitle">
+            <div class="dialog-header">
+                <div>
+                    <p class="eyebrow">GET STARTED</p>
+                    <h2 id="listDialogTitle">Create a list</h2>
+                </div>
+                <button type="button" class="dialog-close" data-close-dialog aria-label="Close">×</button>
+            </div>
+            <form id="listForm" class="list-form">
+                <label>
+                    List title
+                    <input id="listTitle" type="text" placeholder="e.g. Weekend plans" required maxlength="80">
+                </label>
+                <label>
+                    Date
+                    <input id="listDate" type="date" required>
+                </label>
+                <button type="submit" class="primary-button">Create list</button>
+            </form>
+        </dialog>
+
+        <dialog id="settingsDialog" class="app-dialog" aria-labelledby="settingsDialogTitle">
+            <div class="dialog-header">
+                <div>
+                    <p class="eyebrow">PERSONALIZE YOUR LISTS</p>
+                    <h2 id="settingsDialogTitle">Edit tags</h2>
+                </div>
+                <button type="button" class="dialog-close" data-close-dialog aria-label="Close">×</button>
+            </div>
+            <section class="tag-settings" aria-labelledby="tagSettingsTitle">
+                <div class="tag-settings-heading">
+                    <div>
+                        <h3 id="tagSettingsTitle">Edit tags</h3>
+                        <p>Choose a color and add it to your task dropdowns.</p>
+                    </div>
+                </div>
+                <form id="tagForm" class="tag-form">
+                    <label>
+                        New tag
+                        <input id="tagName" type="text" placeholder="e.g. Errands" maxlength="30" required>
+                    </label>
+                    <label class="color-label">
+                        Color
+                        <input id="tagColor" type="color" value="#8d78b5">
+                    </label>
+                    <button type="submit" class="secondary-button">Add tag</button>
+                </form>
+                <div id="tagChips" class="tag-chips" aria-label="Available tags"></div>
+            </section>
+        </dialog>
+
+        <dialog id="editListsDialog" class="app-dialog" aria-labelledby="editListsDialogTitle">
+            <div class="dialog-header">
+                <div>
+                    <p class="eyebrow">KEEP THINGS UP TO DATE</p>
+                    <h2 id="editListsDialogTitle">Edit list</h2>
+                </div>
+                <button type="button" class="dialog-close" data-close-dialog aria-label="Close">×</button>
+            </div>
+            <form id="editListForm" class="edit-list-form">
+                <label>
+                    Choose a list
+                    <select id="editListSelect" required></select>
+                </label>
+                <label>
+                    List title
+                    <input id="editListTitle" type="text" required maxlength="80">
+                </label>
+                <label>
+                    Date
+                    <input id="editListDate" type="date" required>
+                </label>
+                <button type="submit" class="primary-button">Save changes</button>
+            </form>
+        </dialog>
+
+        <dialog id="editTaskDialog" class="app-dialog" aria-labelledby="editTaskDialogTitle">
+            <div class="dialog-header">
+                <h2 id="editTaskDialogTitle">Edit task</h2>
+                <button type="button" class="dialog-close" data-close-dialog aria-label="Close">×</button>
+            </div>
+            <form id="editTaskForm" class="edit-list-form">
+                <label>
+                    Task
+                    <input id="editTaskText" type="text" required maxlength="200">
+                </label>
+                <label>
+                    Tag
+                    <select id="editTaskTag"></select>
+                </label>
+                <button type="submit" class="primary-button">Save changes</button>
+            </form>
+        </dialog>
+
+        <section id="lists" class="lists" aria-label="Todo lists"></section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
