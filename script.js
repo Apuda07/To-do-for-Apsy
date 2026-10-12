@@ -29,6 +29,7 @@ const editTaskForm = document.getElementById('editTaskForm');
 const editTaskText = document.getElementById('editTaskText');
 const editTaskTag = document.getElementById('editTaskTag');
 let editingTask = null;
+let draggedTask = null;
 
 function todayAsDateInputValue() {
     const date = new Date();
@@ -144,6 +145,7 @@ function renderLists() {
 
     lists.forEach((list, listIndex) => {
         const card = createElement('article', 'list-card');
+        card.dataset.listIndex = listIndex;
         const header = createElement('header', 'list-card-header');
         const headingGroup = document.createElement('div');
         const heading = createElement('h2', '', list.title);
@@ -192,6 +194,9 @@ function renderLists() {
         const taskList = createElement('ul', 'task-list');
         list.todos.forEach((todo, todoIndex) => {
             const task = createElement('li', `task-item${todo.completed ? ' completed' : ''}`);
+            task.draggable = true;
+            task.dataset.listIndex = listIndex;
+            task.dataset.todoIndex = todoIndex;
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'task-checkbox';
@@ -415,6 +420,54 @@ listsElement.addEventListener('change', (event) => {
     lists[listIndex].todos[todoIndex].completed = event.target.checked;
     saveLists();
     renderLists();
+});
+
+listsElement.addEventListener('dragstart', (event) => {
+    const task = event.target.closest('.task-item');
+    if (!task) return;
+
+    draggedTask = {
+        listIndex: Number(task.dataset.listIndex),
+        todoIndex: Number(task.dataset.todoIndex)
+    };
+    task.classList.add('dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', `${draggedTask.listIndex}:${draggedTask.todoIndex}`);
+});
+
+listsElement.addEventListener('dragover', (event) => {
+    const card = event.target.closest('.list-card');
+    if (!draggedTask || !card || Number(card.dataset.listIndex) === draggedTask.listIndex) return;
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    card.classList.add('drag-over');
+});
+
+listsElement.addEventListener('dragleave', (event) => {
+    const card = event.target.closest('.list-card');
+    if (card && !card.contains(event.relatedTarget)) card.classList.remove('drag-over');
+});
+
+listsElement.addEventListener('drop', (event) => {
+    const card = event.target.closest('.list-card');
+    if (!draggedTask || !card) return;
+
+    event.preventDefault();
+    const targetListIndex = Number(card.dataset.listIndex);
+    if (targetListIndex !== draggedTask.listIndex) {
+        const [todo] = lists[draggedTask.listIndex].todos.splice(draggedTask.todoIndex, 1);
+        lists[targetListIndex].todos.push(todo);
+        saveLists();
+        renderLists();
+    }
+});
+
+listsElement.addEventListener('dragend', () => {
+    draggedTask = null;
+    listsElement.querySelectorAll('.dragging, .drag-over').forEach((element) => {
+        element.classList.remove('dragging', 'drag-over');
+    });
 });
 
 listsElement.addEventListener('click', (event) => {
