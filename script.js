@@ -1,6 +1,8 @@
 const STORAGE_KEY = 'todoLists';
 const LEGACY_STORAGE_KEY = 'todos';
 const TAG_STORAGE_KEY = 'todoTags';
+const WEEK_STORAGE_KEY = 'todoListsWeek';
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const DEFAULT_TAGS = [
     { name: 'Work', color: '#8eb8d8' },
     { name: 'Home', color: '#91bd9b' },
@@ -31,8 +33,7 @@ const editTaskTag = document.getElementById('editTaskTag');
 let editingTask = null;
 let draggedTask = null;
 
-function todayAsDateInputValue() {
-    const date = new Date();
+function todayAsDateInputValue(date = new Date()) {
     const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
     return localDate.toISOString().slice(0, 10);
 }
@@ -60,6 +61,29 @@ let tags = loadTags();
 
 function saveLists() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lists));
+}
+
+function ensureCurrentWeek(now = new Date()) {
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
+    const week = todayAsDateInputValue(monday);
+    if (localStorage.getItem(WEEK_STORAGE_KEY) === week) return false;
+
+    const weeklyLists = WEEKDAYS.flatMap((title, dayIndex) => {
+        const date = new Date(monday);
+        date.setDate(date.getDate() + dayIndex);
+        const dateValue = todayAsDateInputValue(date);
+        const exists = lists.some((list) =>
+            list.title.trim().toLocaleLowerCase() === title.toLocaleLowerCase() &&
+            list.date === dateValue
+        );
+        return exists ? [] : [{ title, date: dateValue, todos: [] }];
+    });
+
+    lists.unshift(...weeklyLists);
+    saveLists();
+    localStorage.setItem(WEEK_STORAGE_KEY, week);
+    return weeklyLists.length > 0;
 }
 
 function saveTags() {
@@ -503,4 +527,15 @@ listsElement.addEventListener('click', (event) => {
     renderLists();
 });
 
+function refreshCurrentWeek() {
+    if (draggedTask || document.querySelector('.app-dialog[open]')) return;
+    if (ensureCurrentWeek()) renderLists();
+}
+
+ensureCurrentWeek();
 renderLists();
+window.addEventListener('focus', refreshCurrentWeek);
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshCurrentWeek();
+});
+setInterval(refreshCurrentWeek, 60000);
